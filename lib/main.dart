@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'legal_text.dart';
 import 'providers/auth_provider.dart';
 import 'providers/settings_provider.dart';
+import 'screens/disclaimer_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_shell.dart';
 import 'theme/app_theme.dart';
@@ -31,6 +34,7 @@ class HuiLifeApp extends StatelessWidget {
           routes: {
             '/login': (_) => const LoginScreen(),
             '/main': (_) => const MainShell(),
+            '/disclaimer': (_) => const DisclaimerScreen(),
           },
         ),
       ),
@@ -65,6 +69,14 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
     if (!mounted) return;
+    // 首次启动必须先阅读并同意免责声明与用户须知。
+    final prefs = await SharedPreferences.getInstance();
+    final agreed = prefs.getBool(kDisclaimerAgreeKey) ?? false;
+    if (!mounted) return;
+    if (!agreed) {
+      Navigator.of(context).pushReplacementNamed('/disclaimer');
+      return;
+    }
     Navigator.of(context).pushReplacementNamed(auth.isLoggedIn ? '/main' : '/login');
   }
 

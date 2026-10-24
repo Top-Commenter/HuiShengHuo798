@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../app_info.dart';
+import 'disclaimer_screen.dart';
 
 /// 关于页：版本号、仓库/参考项目地址与免责声明。
 class AboutScreen extends StatelessWidget {
@@ -76,6 +77,16 @@ class AboutScreen extends StatelessWidget {
                   subtitle: const Text(kReferenceUrl),
                   trailing: const Icon(Icons.open_in_new, size: 18),
                   onTap: () => _open(context, kReferenceUrl),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.gavel_outlined, color: theme.colorScheme.primary),
+                  title: const Text('免责声明与用户须知'),
+                  subtitle: const Text('随时查阅已同意的条款'),
+                  trailing: const Icon(Icons.chevron_right, size: 18),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const DisclaimerScreen(forceAgree: false),
+                  )),
                 ),
               ],
             ),

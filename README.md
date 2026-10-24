@@ -10,7 +10,7 @@
 
 ## 下载最新版
 
-[![下载最新版](https://img.shields.io/badge/APK-下载最新版-2E9E8F?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Top-Commenter/huilife798/releases/latest)
+[![下载最新版](https://img.shields.io/badge/APK-下载最新版-2E9E8F?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Top-Commenter/HuiShengHuo798/releases/latest)
 
 点上面的按钮即可前往 **Releases** 页面，下载最新安装包 `huilife798-release.apk`。
 
@@ -34,7 +34,7 @@
 
 > **本项目仅供学习与技术研究，不用于任何商业用途。** 详见文末[免责声明](#免责声明)。
 
-- 当前版本：`1.0.7`（版本记录见 [docs/CHANGELOG.md](docs/CHANGELOG.md)）
+- 当前版本：`1.0.8`（版本记录见 [docs/CHANGELOG.md](docs/CHANGELOG.md)）
 - 参考项目：[KazemiyaMione/huish](https://github.com/KazemiyaMione/huish)
 
 ## 功能
