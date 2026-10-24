@@ -1,8 +1,8 @@
 name: huilife798
-description: "惠生活798 自定义版 · 个人学习项目"
+description: "饮咩野 · 校园水控客户端（个人学习项目）"
 publish_to: 'none'
 
-version: 1.0.0+4
+version: 1.0.0+6
 
 environment:
   sdk: ^3.13.5

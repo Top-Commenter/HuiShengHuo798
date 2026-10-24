@@ -22,7 +22,7 @@ class HuiLifeApp extends StatelessWidget {
       ],
       child: Consumer<SettingsProvider>(
         builder: (_, settings, __) => MaterialApp(
-          title: '惠生活798 自定义',
+          title: '饮咩野',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(),
           darkTheme: AppTheme.dark(),
@@ -85,7 +85,7 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Icon(Icons.water_drop, size: 48, color: theme.colorScheme.primary),
             ),
             const SizedBox(height: 20),
-            Text('惠生活798', style: theme.textTheme.titleLarge),
+            Text('饮咩野', style: theme.textTheme.titleLarge),
             const SizedBox(height: 20),
             if (_startupError == null)
               SizedBox(

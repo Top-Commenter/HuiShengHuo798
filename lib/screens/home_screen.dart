@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../api/water_stats.dart';
 import '../providers/auth_provider.dart';
 import 'device_screen.dart';
+import 'qr_scan_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -99,7 +100,24 @@ class _HomeScreenState extends State<HomeScreen> {
     final name = account?['name'] as String? ?? '朋友';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('我的设备')),
+      appBar: AppBar(
+        title: const Text('我的设备'),
+        actions: [
+          IconButton(
+            tooltip: '扫码添加设备',
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: () async {
+              final added = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(builder: (_) => const QrScanScreen()),
+              );
+              if (added == true) {
+                _load();
+                _loadWater();
+              }
+            },
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           await Future.wait([_load(), _loadWater()]);

@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Center(child: Text('惠生活798', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold))),
+                Center(child: Text('饮咩野', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold))),
                 const SizedBox(height: 4),
                 Center(child: Text('自定义客户端 · 仅业务数据', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant))),
                 if (_notice != null) ...[
