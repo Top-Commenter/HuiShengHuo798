@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../api/water_stats.dart';
 import '../providers/auth_provider.dart';
 import 'device_screen.dart';
@@ -21,11 +22,48 @@ class _HomeScreenState extends State<HomeScreen> {
   List<DailyWater>? _water; // null = 加载中
   bool _waterFailed = false;
 
+  /// 本地记住的设备顺序（设备 id 列表），不写回服务端。
+  static const _orderKey = 'device_order_v1';
+  List<String> _order = [];
+
   @override
   void initState() {
     super.initState();
     _load();
     _loadWater();
+    _loadOrder();
+  }
+
+  Future<void> _loadOrder() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getStringList(_orderKey) ?? [];
+    if (mounted) setState(() => _order = saved);
+  }
+
+  /// 按本地保存的顺序排列设备，未保存过的新设备排在末尾。
+  List<Map<String, dynamic>> _sorted(List<Map<String, dynamic>> favos) {
+    final pos = {for (var i = 0; i < _order.length; i++) _order[i]: i};
+    final list = List<Map<String, dynamic>>.of(favos);
+    list.sort((a, b) {
+      final ai = pos[a['id']];
+      final bi = pos[b['id']];
+      if (ai == null && bi == null) return 0;
+      if (ai == null) return 1;
+      if (bi == null) return -1;
+      return ai.compareTo(bi);
+    });
+    return list;
+  }
+
+  Future<void> _onReorder(
+      List<Map<String, dynamic>> shown, int oldIndex, int newIndex) async {
+    if (newIndex > oldIndex) newIndex -= 1;
+    final ids = shown.map((f) => f['id'] as String? ?? '').toList();
+    final moved = ids.removeAt(oldIndex);
+    ids.insert(newIndex, moved);
+    setState(() => _order = ids);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_orderKey, ids);
   }
 
   /// 近 7 天直饮机饮水看板，独立加载，不阻塞设备列表。
@@ -96,6 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final favos = (_master?['favos'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final shown = _sorted(favos);
     final account = _master?['account'] as Map<String, dynamic>?;
     final name = account?['name'] as String? ?? '朋友';
 
@@ -122,68 +161,107 @@ class _HomeScreenState extends State<HomeScreen> {
         onRefresh: () async {
           await Future.wait([_load(), _loadWater()]);
         },
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          children: [
-            // 问候卡
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
+        // 用 CustomScrollView + SliverReorderableList 保持单一滚动上下文：
+        // 设备卡若嵌在另一个 ListView 里，父级滚动会吞掉排序手势。
+        child: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              sliver: SliverToBoxAdapter(
+                child: Column(
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('你好，$name', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
-                          Text(_greeting(), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                        ],
+                    // 问候卡
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('你好，$name',
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 4),
+                                  Text(_greeting(),
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                          color: theme.colorScheme.onSurfaceVariant)),
+                                ],
+                              ),
+                            ),
+                            if (_running.isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text('${_running.length} 台运行中',
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: theme.colorScheme.onPrimaryContainer,
+                                        fontWeight: FontWeight.w600)),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
-                    if (_running.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text('${_running.length} 台运行中',
-                            style: TextStyle(fontSize: 12, color: theme.colorScheme.onPrimaryContainer, fontWeight: FontWeight.w600)),
-                      ),
+                    const SizedBox(height: 16),
+                    _waterCard(theme),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            _waterCard(theme),
-            const SizedBox(height: 16),
             if (_loading)
-              const Padding(padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator()))
-            else if (_error != null)
-              Card(
+              const SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(children: [
-                    Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
-                    const SizedBox(height: 12),
-                    OutlinedButton(onPressed: _load, child: const Text('重试')),
-                  ]),
+                    padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator())),
+              )
+            else if (_error != null)
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverToBoxAdapter(
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(children: [
+                        Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+                        const SizedBox(height: 12),
+                        OutlinedButton(onPressed: _load, child: const Text('重试')),
+                      ]),
+                    ),
+                  ),
                 ),
               )
-            else if (favos.isEmpty)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(children: [
-                    Icon(Icons.water_drop_outlined, size: 44, color: theme.colorScheme.onSurfaceVariant),
-                    const SizedBox(height: 12),
-                    const Text('还没有绑定设备'),
-                  ]),
+            else if (shown.isEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverToBoxAdapter(
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(children: [
+                        Icon(Icons.water_drop_outlined,
+                            size: 44, color: theme.colorScheme.onSurfaceVariant),
+                        const SizedBox(height: 12),
+                        const Text('还没有绑定设备'),
+                      ]),
+                    ),
+                  ),
                 ),
               )
             else
-              ...favos.map(_deviceCard),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverReorderableList(
+                  itemCount: shown.length,
+                  onReorder: (o, n) => _onReorder(shown, o, n),
+                  itemBuilder: (_, i) => _deviceCard(shown[i], i),
+                ),
+              ),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),
       ),
@@ -316,7 +394,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return '晚上好';
   }
 
-  Widget _deviceCard(Map<String, dynamic> f) {
+  Widget _deviceCard(Map<String, dynamic> f, int index) {
     final theme = Theme.of(context);
     final id = f['id'] as String? ?? '';
     final name = f['name'] as String? ?? '未知设备';
@@ -326,6 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final running = _running.contains(id);
 
     return Padding(
+      key: ValueKey(id),
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
         child: InkWell(
@@ -381,7 +460,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
+                ReorderableDragStartListener(
+                  index: index,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Icon(Icons.drag_handle, color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                ),
               ],
             ),
           ),

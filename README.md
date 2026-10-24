@@ -6,15 +6,35 @@
   <img src="assets/app_icon.png" width="88" alt="应用图标">
 </p>
 
+一个基于 Flutter 的个人学习项目，重新实现了校园水控客户端的常用功能：查询设备、扫码添加设备、扫码/取水、实时费用、账单与每日饮水统计。
+
+## 下载最新版
+
 [![下载最新版](https://img.shields.io/badge/APK-下载最新版-2E9E8F?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Top-Commenter/huilife798/releases/latest)
 
-点上面的按钮即可前往 **Releases** 页面下载最新 APK（`huilife798-release.apk`），在 Android 手机上允许「安装未知来源应用」后直接安装。
+点上面的按钮即可前往 **Releases** 页面，下载最新安装包 `huilife798-release.apk`。
 
-一个基于 Flutter 的个人学习项目，重新实现了校园水控客户端的常用功能：查询设备、扫码添加设备、扫码/取水、实时费用、账单与每日饮水统计。
+### 支持的系统
+
+| 项目 | 说明 |
+| --- | --- |
+| 操作系统 | **仅支持 Android**（iOS、鸿蒙 NEXT 无原生版本） |
+| 最低系统版本 | Android 7.0（API 24） |
+| 推荐系统版本 | Android 10 及以上 |
+| 目标系统版本 | Android 16（API 36） |
+| CPU 架构 | arm64-v8a / armeabi-v7a / x86_64（不支持 32 位 x86） |
+| 安装包 | 通用 APK，约 71 MB，无需区分机型 |
+| 所需权限 | 摄像头（扫码添加设备、扫码取水）、网络访问 |
+
+### 安装步骤
+
+1. 点击上方按钮下载 APK 到手机
+2. 在系统提示中允许「安装未知来源应用」（设置 → 应用 → 特殊权限）
+3. 安装完成后打开，使用原客户端账号登录即可
 
 > **本项目仅供学习与技术研究，不用于任何商业用途。** 详见文末[免责声明](#免责声明)。
 
-- 当前版本：`1.0.0+6`（版本记录见 [docs/CHANGELOG.md](docs/CHANGELOG.md)）
+- 当前版本：`1.0.7`（版本记录见 [docs/CHANGELOG.md](docs/CHANGELOG.md)）
 - 参考项目：[KazemiyaMione/huish](https://github.com/KazemiyaMione/huish)
 
 ## 功能
@@ -69,7 +89,7 @@ flutter build apk --release # 构建安装包
 
 1. 更新 `docs/CHANGELOG.md` 顶部记录，并同步递增 `pubspec.yaml` 与 `lib/app_info.dart` 的版本号
 2. `flutter build apk --release`，产物位于 `build/app/outputs/flutter-apk/app-release.apk`
-3. 在 GitHub 仓库 → **Releases** → *Draft a new release*：Tag 填 `v1.0.0+N`，上传重命名后的 `huilife798-release.apk`
+3. 在 GitHub 仓库 → **Releases** → *Draft a new release*：Tag 填 `v1.0.N`（与 CHANGELOG 里的标题一致），上传重命名后的 `huilife798-release.apk`
 4. 发布后 README 顶部的「下载最新版」按钮会自动指向该 Release
 
 ## 更新日志

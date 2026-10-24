@@ -2,7 +2,7 @@ name: huilife798
 description: "饮咩野 · 校园水控客户端（个人学习项目）"
 publish_to: 'none'
 
-version: 1.0.0+6
+version: 1.0.7+7
 
 environment:
   sdk: ^3.13.5
@@ -25,5 +25,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - docs/CHANGELOG.md

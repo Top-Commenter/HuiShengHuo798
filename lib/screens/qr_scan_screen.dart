@@ -59,25 +59,39 @@ class _QrScanScreenState extends State<QrScanScreen> {
     final nav = Navigator.of(context);
 
     try {
-      final resp = await api.getDeviceQr(did);
+      // 先确认二维码对应真实设备，再调用收藏接口把它加入「我的设备」。
+      // 只查 qr/use 不会改变设备列表，这是之前“扫码后列表没变化”的原因。
+      final check = await api.getDeviceQr(did);
+      if (!mounted) return;
+      if (!check.isSuccess) {
+        setState(() => _binding = false);
+        messenger.showSnackBar(SnackBar(
+            content: Text(check.msg ?? '二维码无效或设备不存在 (code: ${check.code})')));
+        await Future.delayed(const Duration(milliseconds: 1500));
+        if (mounted) setState(() => _done = false);
+        return;
+      }
+
+      final fav = await api.favoriteDevice(did);
       if (!mounted) return;
       setState(() => _done = true);
 
-      if (resp.isSuccess) {
+      if (fav.isSuccess) {
         messenger.showSnackBar(
           const SnackBar(content: Text('设备添加成功'), backgroundColor: Colors.green),
         );
         await Future.delayed(const Duration(milliseconds: 600));
         nav.pop(true);
-      } else if (resp.code == 400 || resp.code == 409) {
+      } else if (fav.code == 400 || fav.code == 409) {
         messenger.showSnackBar(
-          const SnackBar(content: Text('设备已在列表中或已绑定'), backgroundColor: Colors.orange),
+          const SnackBar(content: Text('设备已在列表中'), backgroundColor: Colors.orange),
         );
         await Future.delayed(const Duration(milliseconds: 800));
         nav.pop(true);
       } else {
         setState(() => _binding = false);
-        messenger.showSnackBar(SnackBar(content: Text('绑定失败 (code: ${resp.code})，请重试')));
+        messenger.showSnackBar(SnackBar(
+            content: Text(fav.msg ?? '添加失败 (code: ${fav.code})，请重试')));
       }
     } catch (_) {
       if (!mounted) return;
