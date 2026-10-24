@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../app_info.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import 'about_screen.dart';
 import 'wallet_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -103,6 +105,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onChanged: (v) => settings.setShowScore(v),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          // 关于
+          Card(
+            child: ListTile(
+              leading: Icon(Icons.info_outline, color: theme.colorScheme.primary),
+              title: const Text('关于'),
+              subtitle: Text('版本 $kAppVersion · 历史版本更新 · 仓库源码'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AboutScreen()),
+              ),
             ),
           ),
           const SizedBox(height: 16),

@@ -2,7 +2,7 @@ name: huilife798
 description: "惠生活798 自定义版 · 个人学习项目"
 publish_to: 'none'
 
-version: 1.0.0+3
+version: 1.0.0+4
 
 environment:
   sdk: ^3.13.5
@@ -25,3 +25,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - docs/CHANGELOG.md
